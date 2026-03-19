@@ -28,7 +28,7 @@ graph TD
 
 ---
 
-## 🛡️ Industrial-Strength Rate Limiting
+## 🛡️ Rate Limiting
 
 Unlike basic rate limiters that reset on server restarts, PhiloGPT uses a **Persistent Sliding Window** algorithm:
 - **Global Memory**: All server instances share a single source of truth via **Upstash Redis**.
