@@ -26,6 +26,10 @@ export default function useChat({ currentSession, onUpdateSession, onNewSession,
   // Handle automatic session title generation and persistence
   useEffect(() => {
     if (!currentSession || messages === currentSession.messages) return;
+    
+    // Guard: skip if messages are stale from a previous session
+    // (new session has 0 messages but local state hasn't synced yet)
+    if (currentSession.messages.length === 0 && messages.length > 0) return;
 
     const firstUserText = messages.find(m => m.role === 'user')?.content;
     const isNew = currentSession.title === 'New Reflection';
