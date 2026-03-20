@@ -11,13 +11,16 @@ Built with a focus on privacy, speed, and architectural elegance, PhiloGPT combi
 PhiloGPT uses a hybrid state management system to ensure performance and scalability.
 
 ```mermaid
-graph TD
-    User((User)) -->|HTTPS| Frontend[Next.js App Router]
-    Frontend -->|LocalStorage| History[(Chat History)]
-    Frontend -->|SSE Stream| API[Next.js API Route]
-    API -->|Atomic Check| Redis[(Upstash Redis)]
-    API -->|Strategy Pattern| AI[AI Provider: Gemini/OpenAI]
-    AI -->|Streaming Data| User
+flowchart LR
+    User((User)) -->|Message| Frontend[Next.js Frontend]
+    Frontend -->|POST /api/chat| Middleware[Middleware]
+    Middleware -->|Validated| API[API Route]
+    API -->|Sliding Window Check| Redis[(Upstash Redis)]
+    Redis -->|Allowed / Blocked| API
+    API -->|System Prompt + History| AI[AI Provider]
+    AI -->|Stream Chunks| API
+    API -->|SSE Stream| Frontend
+    Frontend -->|Persist| Storage[(LocalStorage)]
 ```
 
 ### **Core Design Patterns**
