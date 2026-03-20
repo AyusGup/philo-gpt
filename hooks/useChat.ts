@@ -16,20 +16,25 @@ export default function useChat({ currentSession, onUpdateSession, onNewSession,
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const justSyncedRef = useRef(false);
 
-  // Sync with current session
+  // Sync local messages with current session when switching sessions
   useEffect(() => {
+    justSyncedRef.current = true;
     setMessages(currentSession?.messages || []);
     setError(null);
   }, [currentSession?.id]);
 
   // Handle automatic session title generation and persistence
   useEffect(() => {
-    if (!currentSession || messages === currentSession.messages) return;
-    
-    // Guard: skip if messages are stale from a previous session
-    // (new session has 0 messages but local state hasn't synced yet)
-    if (currentSession.messages.length === 0 && messages.length > 0) return;
+    if (!currentSession) return;
+
+    // Skip the save that fires right after we synced messages from the session
+    // (this prevents a redundant write when switching sessions)
+    if (justSyncedRef.current) {
+      justSyncedRef.current = false;
+      return;
+    }
 
     const firstUserText = messages.find(m => m.role === 'user')?.content;
     const isNew = currentSession.title === 'New Reflection';
